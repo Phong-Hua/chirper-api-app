@@ -1,0 +1,6 @@
+Django
+djangorestframework
+# linting tool
+flake8
+# postgres
+psycopg2

@@ -1,0 +1,38 @@
+# First line is version of docker compose
+version: "3"
+
+# Define services that make up our application
+services:
+  # We gonna have a service call app, and build context is our current directory
+  app:
+    build: 
+      context: .
+    # We map our port 8000 on our host to port 8000 on our image
+    # To access: 127.0.0.1/8000
+    ports:
+      - "8000:8000"
+    # volumes allow us to make our update in our project into our image in realtime.
+    # Any change in the project will be automatically update in the container. No need to restart
+    # docker to make change into effect
+    # We map app directory in our project into the app directory in our docker image
+    volumes:
+      - ./app:/app
+    command: >
+      sh -c "python manage.py wait_for_db && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+  
+    # Modify environment to work with database
+    environment:
+      - DB_HOST=db
+      - DB_NAME=app
+      - DB_USER=postgres
+      - DB_PASS=supersecretpassword
+    depends_on:
+      - db # This app service will be depend on db service
+
+  # Our database service
+  db:
+    image: postgres:10-alpine
+    environment:
+      - POSTGRES_DB=app # This need to be exactly
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=supersecretpassword # In production, do not put password here
